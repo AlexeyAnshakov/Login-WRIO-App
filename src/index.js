@@ -1,5 +1,3 @@
-require('babel/register');
-
 import nconf from "./wrio_nconf.js";
 import express from 'express';
 import passport from 'passport';
@@ -76,37 +74,22 @@ function server_setup(db) {
     app.use(p3p(p3p.recommended));
 
 
-    app.get('/', function(request, response) {
+    app.get('/auth', function(request, response) {
         logger.log('verbose',"SSID " + request.sessionID);
         logger.log('verbose',"Logged user", request.user);
-        var command = '';
-        for (var i in request.query) {
-            if (command === '') {
-                command = i;
-            }
-        }
-        switch (command) {
-            case 'auth':
-                {
-                    response.render('index', {
-                        user: request.user
-                    });
-                    break;
-                }
-            default:
-                {
 
-                    response.sendFile("index.html",{
-                        root: path.join(__dirname, '..', '/hub/')
-                    });
-                }
-        }
+        response.render('index', {
+            user: request.user
+        });
+
     });
 
     LoginStrategy(app, passport, db);
 
     app.use(LoginRouter);
     app.use(ProfileRouter);
+
+    app.use('/', express.static(path.join(__dirname, '..', '/hub/')));
 
 
     logger.log('info','Login server config finished');
